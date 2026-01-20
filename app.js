@@ -97,7 +97,158 @@ const renderRecipes = (recipesToRender) => {
 // Initialize App
 renderRecipes(recipes);
 
-// Helpful logs (optional for students)
-console.log('Total recipes:', recipes.length);
-console.log('First recipe:', recipes[0]);
-console.log('Rendering complete!');
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+let currentFilter = "all";
+let currentSort = "none";
+const filterButtons = document.querySelectorAll(".filter-btn");
+const sortButtons = document.querySelectorAll(".sort-btn");
+
+
+// ============================================
+// PURE FILTER FUNCTIONS
+// ============================================
+
+// Filter by difficulty
+const filterByDifficulty = (recipes, difficulty) => {
+    return recipes.filter(recipe => recipe.difficulty === difficulty);
+};
+
+// Filter by time
+const filterByTime = (recipes, maxTime) => {
+    return recipes.filter(recipe => recipe.time <= maxTime);
+};
+
+// Apply selected filter
+const applyFilter = (recipes, filterType) => {
+    switch (filterType) {
+        case "easy":
+            return filterByDifficulty(recipes, "easy");
+        case "medium":
+            return filterByDifficulty(recipes, "medium");
+        case "hard":
+            return filterByDifficulty(recipes, "hard");
+        case "quick":
+            return filterByTime(recipes, 30);
+        case "all":
+        default:
+            return recipes;
+    }
+};
+
+
+// ============================================
+// PURE SORT FUNCTIONS
+// ============================================
+
+// Sort by name (A-Z)
+const sortByName = (recipes) => {
+    return [...recipes].sort((a, b) =>
+        a.title.localeCompare(b.title)
+    );
+};
+
+// Sort by time (fastest first)
+const sortByTime = (recipes) => {
+    return [...recipes].sort((a, b) => a.time - b.time);
+};
+
+// Apply selected sort
+const applySort = (recipes, sortType) => {
+    switch (sortType) {
+        case "name":
+            return sortByName(recipes);
+        case "time":
+            return sortByTime(recipes);
+        case "none":
+        default:
+            return recipes;
+    }
+};
+
+
+// ============================================
+// RENDER FUNCTIONS
+// ============================================
+
+
+// ============================================
+// MAIN UPDATE FUNCTION
+// ============================================
+
+const updateDisplay = () => {
+    let result = recipes;
+
+    result = applyFilter(result, currentFilter);
+    result = applySort(result, currentSort);
+
+    renderRecipes(result);
+
+    console.log(
+        `Displaying ${result.length} recipes (Filter: ${currentFilter}, Sort: ${currentSort})`
+    );
+};
+
+
+// ============================================
+// UI HELPER FUNCTIONS
+// ============================================
+
+const updateActiveButtons = () => {
+    filterButtons.forEach(btn => {
+        btn.classList.toggle(
+            "active",
+            btn.dataset.filter === currentFilter
+        );
+    });
+
+    sortButtons.forEach(btn => {
+        btn.classList.toggle(
+            "active",
+            btn.dataset.sort === currentSort
+        );
+    });
+};
+
+
+// ============================================
+// EVENT HANDLERS
+// ============================================
+
+const handleFilterClick = (event) => {
+    currentFilter = event.target.dataset.filter;
+    updateActiveButtons();
+    updateDisplay();
+};
+
+const handleSortClick = (event) => {
+    currentSort = event.target.dataset.sort;
+    updateActiveButtons();
+    updateDisplay();
+};
+
+
+// ============================================
+// EVENT LISTENER SETUP
+// ============================================
+
+const setupEventListeners = () => {
+    filterButtons.forEach(btn =>
+        btn.addEventListener("click", handleFilterClick)
+    );
+
+    sortButtons.forEach(btn =>
+        btn.addEventListener("click", handleSortClick)
+    );
+
+    console.log("Event listeners attached");
+};
+
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+setupEventListeners();
+updateDisplay();
